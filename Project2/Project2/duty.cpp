@@ -87,11 +87,12 @@ int main()
     
     // calculate "totalDuty" by summing "first1000Duty", "next12000Duty", and "remainingDuty"
     totalDuty = first1000Duty + next12000Duty + remainingDuty;
-    
+    /*
     cout << first1000Duty << endl;
     cout << next12000Duty << endl;
     cout << remainingDuty << endl;
     cout << totalDuty << endl;
+     */
     
     // output hyphens and final statement
     cout << "---" << endl;
