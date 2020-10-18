@@ -31,7 +31,7 @@ int main()
     cout << pctJoe << "% say they will vote for Joe." << endl;
     cout << pctDonald << "% say they will vote for Donald." << endl;
     
-    if (forJoe < forDonald) // output now indicates that Joe will win if Donald gets more votes, and vice versa
+    if (forJoe < forDonald) /* output now indicates that Joe will win if more respondents say they will vote for Donald, and vice versa */
         cout << "Joe is predicted to win the election." << endl;
     else
         cout << "Donald is predicted to win the election." << endl;

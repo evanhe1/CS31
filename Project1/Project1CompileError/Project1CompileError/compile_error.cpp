@@ -10,6 +10,7 @@ using namespace std;
 
 int main()
 {
+    // failure to instantiate numberSurveyed variable
     int forJoe;
     int forDonald;
     
@@ -30,7 +31,7 @@ int main()
     cout << pctJoe << "% say they will vote for Joe." << endl;
     cout << pctDonald << "% say they will vote for Donald." << endl;
     
-    if (forJoe > forDonald);
+    if (forJoe > forDonald); // semicolon here creates empty if statement and dangling else statement
         cout << "Joe is predicted to win the election." << endl;
     else
         cout << "Donald is predicted to win the election." << endl;
