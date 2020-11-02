@@ -162,15 +162,4 @@ int tallyVotes(string pollData, char party, int& voteTally)
 
 int main()
 {
-    string s = "14NJD55CAP";
-    int v = 98989;
-    bool b = isSyntacticallyCorrect(s);
-    int n = tallyVotes("", ' ', v);
-    cout << s << endl;
-    cout << "Is syntactically correct: ";
-    if (b)
-        cout << "True" << endl;
-    else
-        cout << "False" << endl;
-    cout << "Vote tally: " << v << endl << "Exit code: " << n << endl;
 }
