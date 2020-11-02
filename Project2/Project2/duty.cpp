@@ -25,7 +25,7 @@ int main()
         return 0;
     }
     
-    // prompt user to enter value, read user input for value, store in double "value", check for non-positive value and output appropriate message if necessary
+    // prompt user to enter value, read user input for value, store in double "value", check for non-positive value case and output appropriate message if necessary
     cout << "Value: ";
     cin >> value;
     cin.ignore(6969, '\n');
