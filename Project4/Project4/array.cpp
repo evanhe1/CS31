@@ -370,7 +370,6 @@ int main() {
     //for (int i = 0; i != 4; i++)
         //cerr << a1[i] << " ";
     //cerr << endl;
-    
     string a2[5] = {"cairnsmore", "norbury blue", "cheshire", "cornish yarg", "lancashire"};
     assert(appendToAll(a2, 5, "") == 5);
     //for (int i = 0; i != 5; i++)
@@ -413,7 +412,6 @@ int main() {
     //for (int i = 0; i != 6; i++)
         //cerr << d1[i] << " ";
     //cerr << endl;
-    
     string d2[6] = {"a", "b", "c", "d", "e", "f"};
     assert(rotateLeft(d2, 6, 5) == 5);
     //for (int i = 0; i != 6; i++)
@@ -446,7 +444,7 @@ int main() {
     assert(countRuns(e3, 5) == 4);
     string e4[5] = {"cheshire", "cheshire", "cheshire", "cheshire", "cheshire"};
     assert(countRuns(e4, 5) == 1);
-
+     
     string emptyArray6[0] = {};
     assert(flip(emptyArray6, 0) == 0);
     string f1[5] = {"cheshire", "cornish yarg", "cairnsmore", "norbury blue", "lancashire"};
@@ -456,7 +454,6 @@ int main() {
     //for (int i = 0; i != 5; i++)
         //cerr << f1[i] << " ";
         //cerr << endl;
-
     string f2[4] = {"cheshire", "cornish yarg", "cairnsmore", "norbury blue"};
     assert(flip(f2, 4) == 4);
     //for (int i = 0; i != 4; i++)
@@ -467,7 +464,6 @@ int main() {
     //for (int i = 0; i != 3; i++)
         //cerr << f3[i] << " ";
         //cerr << endl;
-
     string f4[5] = {"", "", "", "", ""};
     assert(flip(f4, 5) == 5);
     //for (int i = 0; i != 5; i++)
@@ -502,7 +498,6 @@ int main() {
     assert(subsequence(h1, 1, h2, 2) == -1);
     string h3[1] = {"thesenate"};
     assert(subsequence(h1, 4, h3, 2) == -1);
-    
     
     string emptyArray11[0] = {};
     string emptyArray12[0] = {};
