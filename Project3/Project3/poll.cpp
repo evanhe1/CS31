@@ -43,7 +43,7 @@ bool isSyntacticallyCorrect(string pollData)
     }
     
     /* convert all lowercase letters in pollData to uppercase letters for use of isValidUppercaseStateCode
-     since state codes are not case sensitive but the function is
+     since state codes are not case sensitive but that function is
      */
     for (size_t j = 0; j != pollData.size(); j++)
     {
@@ -55,7 +55,7 @@ bool isSyntacticallyCorrect(string pollData)
     while (k < pollData.size() - 3)
     {
         /* checks case of one digit (representing a state having single-digit electoral votes)
-         followed by a valid two-character state code (determined using isValidUppercasestateCode)
+         followed by a valid two-character state code (determined using isValidUppercaseStateCode())
          and one-character party affiliation
          */
         if (isdigit(pollData.at(k)) && isValidUppercaseStateCode(pollData.substr(k + 1, 2)) && isalpha(pollData.at(k + 3)))
@@ -64,7 +64,7 @@ bool isSyntacticallyCorrect(string pollData)
             k += 4;
         }
         /* checks case of two digits (representing a state having double-digit electoral votes)
-         followed by a valid two-character state code (determined using isValidUppercasestateCode)
+         followed by a valid two-character state code (determined using isValidUppercaseStateCode())
          and one-character party affiliation
          */
         else if (isdigit(pollData.at(k)) && isdigit(pollData.at(k + 1)) &&
@@ -109,7 +109,7 @@ int tallyVotes(string pollData, char party, int& voteTally)
     if (pollData.at(0) == '0')
         return 3;
     else
-        /* return 3 if the character immeidately preceding and following a '0' are both letters or if two '0' characters occur in a row
+        /* return 3 if the character immediately preceding and following a '0' are both letters or if two '0' characters occur in a row
          */
         for (size_t n = 1; n != pollData.size() - 1; n++)
             if ((isalpha(pollData.at(n - 1)) && pollData.at(n) == '0' && isalpha(pollData.at(n + 1)))
