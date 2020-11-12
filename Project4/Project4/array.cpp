@@ -358,7 +358,7 @@ int main() {
     
     assert(divide(h, 7, "lindsey") == 3);
     
-    cout << "All tests succeeded" << endl;
+    cerr << "All tests succeeded" << endl;
     
     string emptyArray1[0] = {};
     assert(appendToAll(emptyArray1, 0, "p") == 0);
@@ -526,5 +526,5 @@ int main() {
     assert(divide(k1, 3, "Cheshire") == 1);
     assert(divide(k1, 8, "lancashire") == 8);
     assert(divide(k1, 8, "") == 0);
-    cout << "All tests succeeded" << endl;
+    cerr << "All tests succeeded" << endl;
 }
