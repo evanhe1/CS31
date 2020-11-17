@@ -523,5 +523,6 @@ int main() {
     assert(divide(k1, 8, "lancashire") == 8);
     assert(divide(k1, 8, "") == 0)
     */
+    
     cerr << "All tests succeeded" << endl;
 }
