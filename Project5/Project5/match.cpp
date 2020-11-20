@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cstring>
 #include <cctype>
+#include <cassert>
 
 using namespace std;
 
@@ -26,14 +27,6 @@ bool isOnlyLowerCase(char s[])
 
 int cleanupRules(char wordin[][MAX_WORD_LENGTH + 1], char wordout[][MAX_WORD_LENGTH + 1], int nRules)
 {
-    /* create temporary arrays for program efficiency to reduce the number of traversals
-     through original arrays when modifying them to only contain match rules in clean form,
-     nextLocationInTemp indicates where to store next valid word rule
-     */
-    char tempWordin[nRules][MAX_WORD_LENGTH + 1];
-    char tempWordout[nRules][MAX_WORD_LENGTH + 1];
-    int nextLocationInTemp = 0;
-    
     // return 0 if parameter indicates to check 0 or less match rules
     if (nRules <= 0)
         return 0;
@@ -54,6 +47,11 @@ int cleanupRules(char wordin[][MAX_WORD_LENGTH + 1], char wordout[][MAX_WORD_LEN
         }
     }
     
+    /* nextLocationToStore tracks the next index in wordin and wordout that does not already contain a processed
+     word rule
+     */
+    int nextLocationToStore = 0;
+    
     // this loop will properly process all potential one-word rules
     for (int i = 0; i < nRules; i++)
     {
@@ -69,22 +67,45 @@ int cleanupRules(char wordin[][MAX_WORD_LENGTH + 1], char wordout[][MAX_WORD_LEN
                 // check if elements in wordin and wordout at index i constitute potential one-word rule
                 if (strlen(wordout[i]) == 0)
                 {
-                    // check if element at wordin[i] does not already appear in tempWordin
+                    /* check if element at wordin[i] has already been processed as part of a one-word rule (moved
+                     to the front of wordin), every element coming before wordin[nextLocationToStore] is al element in
+                     clean form, so a match would indicate that the element at wordin[i] is a duplicate
+                     */
                     int j;
-                    for (j = 0; j < nRules; j++)
-                        if (strcmp(wordin[i], tempWordin[j]) == 0)
+                    for (j = 0; j < nextLocationToStore; j++)
+                        if (strcmp(wordin[i], wordin[j]) == 0)
                             break;
                     
                     /* at this point all criteria are satisfied for a valid, non-duplicate one-word rule
-                     so wordin[i] is stored at the next available location with an undefined
-                     value in tempWordIn, and wordout[i] (guarenteed to be the empty string) is stored
-                     at the next available location with an undefined value in tempWordout
+                     so all elements between indices nextLocationToStore and i (the index of the newly found
+                     word rule in clean form) in wordin and wordout are shifted over one to the right before
+                     wordin[i] and wordout[i] (which is guarenteed to be the empty string) are reinserted into
+                     their repsective arrays at index nextLocationToStore, nextLocationToStore is then incremented
+                     
+                     this process is analogous to a rotateRight function in Project 4
                      */
-                    if (j == nRules)
+                    if (j == nextLocationToStore)
                     {
-                        strcpy(tempWordin[nextLocationInTemp], wordin[i]);
-                        strcpy(tempWordout[nextLocationInTemp], wordout[i]); /* wordout[i] is empty string */
-                        nextLocationInTemp++;
+                        /* nextWordinElementToMove and nextWordoutElementToMove are char arrays that will serve as a temporary arrays
+                         to store a newly found clean form word rule while other elements are shifted so the word rule can be stored in
+                         front of all unprocessed elements
+                         */
+                        char nextWordinElementToMove[MAX_WORD_LENGTH + 1];
+                        char nextWordoutElementToMove[MAX_WORD_LENGTH + 1];
+                        
+                        strcpy(nextWordinElementToMove, wordin[i]);
+                        strcpy(nextWordoutElementToMove, wordout[i]);
+                        for (int p = i - 1; p >= nextLocationToStore; p--)
+                        {
+                            strcpy(wordin[p + 1], wordin[p]);
+                            strcpy(wordout[p + 1], wordout[p]);
+                        }
+                        
+                        strcpy(wordin[nextLocationToStore], nextWordinElementToMove);
+                        strcpy(wordout[nextLocationToStore], nextWordoutElementToMove);
+                        cerr << wordin[nextLocationToStore] << " " << wordout[nextLocationToStore] << endl;////////////////////////////////////////
+                        
+                        nextLocationToStore++;
                     }
                 }
             }
@@ -109,49 +130,64 @@ int cleanupRules(char wordin[][MAX_WORD_LENGTH + 1], char wordout[][MAX_WORD_LEN
                 if (strcmp(wordin[i], wordout[i]) != 0)
                 {
                     int k;
-                    for (k = 0; k < nRules; k++)
+                    for (k = 0; k < nextLocationToStore; k++)
                     {
-                        /* check if element at wordin[i] does not already appear in tempWordin as part of a
-                         a one-word rule (wordin[i] is present is tempWordin and tempWordout[i] is the empty
-                         string)
+                        /* check if element at wordin[i] has not already been processed as part of a one-word rule
+                         (a match for wordin[i] occurs before index nextLocationToStore in wordin)
                          */
-                        if (strcmp(wordin[i], tempWordin[k]) == 0 && strlen(tempWordout[k]) == 0)
+                        if (strcmp(wordin[k], wordin[i]) == 0 && strlen(wordout[k]) == 0)
                             break;
-                        /* check if element at wordin[i] does not already appear in tempWordin as part of a
-                         an identical two-word rule (wordin[i] is present is tempWordin and tempWordout[i] is the empty
-                         string)
+                        /* check if element at wordin[i] and wordout[i] has not already been processed as part of
+                         an identical two-word rule (a match for wordout occurs before index nextLocationToStore
+                         in wordout, at this point in execution wordout[i] is already guarenteed to not be the
+                         empty string)
                          */
-                        if (strcmp(wordin[i], tempWordin[k]) == 0 && strcmp(wordout[i], tempWordout[k]) == 0)
+                        if (strcmp(wordin[k], wordin[i]) == 0 && strcmp(wordout[k], wordout[i]) == 0)
                             break;
                     }
                     
-                    /* at this point all criteria are satisfied for a valid, non-duplicate two-word rule
-                     that does not also overlap with a pre-existing one-word rule, so wordin[i] is stored
-                     at the next available location with an undefined value in tempWordin, and wordout[i]
-                     is stored at the next available location with an undefined value in tempWordout
+                    /* at this point all criteria are satisfied for a valid, non-duplicate one-word rule
+                     that does not also overlap with a pre-existing one-word rule, so all elements between
+                     indices nextLocationToStore and i (the index of the newly found word rule in clean form)
+                     in wordin and wordout are shifted over one to the right before wordin[i] and wordout[i]
+                     are reinserted into their repsective arrays at index nextLocationToStore, nextLocationToStore
+                     is then incremented
+                     
+                     this process is analogous to a rotateRight function in Project 4
                      */
-                    if (k == nRules)
+                    if (k == nextLocationToStore)
                     {
-                        strcpy(tempWordin[nextLocationInTemp], wordin[i]);
-                        strcpy(tempWordout[nextLocationInTemp], wordout[i]);
-                        nextLocationInTemp++;
+                        /* nextWordinElementToMove and nextWordoutElementToMove are char arrays that will serve as a temporary arrays
+                         to store a newly found clean form word rule while other elements are shifted so the word rule can be stored in
+                         front of all unprocessed elements
+                         */
+                        char nextWordinElementToMove[MAX_WORD_LENGTH + 1];
+                        char nextWordoutElementToMove[MAX_WORD_LENGTH + 1];
+                        
+                        strcpy(nextWordinElementToMove, wordin[i]);
+                        strcpy(nextWordoutElementToMove, wordout[i]);
+                        for (int p = i - 1; p >= nextLocationToStore; p--)
+                        {
+                            strcpy(wordin[p + 1], wordin[p]);
+                            strcpy(wordout[p + 1], wordout[p]);
+                        }
+                        
+                        strcpy(wordin[nextLocationToStore], nextWordinElementToMove);
+                        strcpy(wordout[nextLocationToStore], nextWordoutElementToMove);
+                        
+                        cerr << wordin[nextLocationToStore] << " " << wordout[nextLocationToStore] << endl;////////////////////////////////////////
+                        
+                        nextLocationToStore++;
                     }
                 }
             }
         }
     }
     
-    // copy elements into tempWordin and tempWordout into wordin and wordout respectively
-    for (int i = 0; i < nRules; i++)
-    {
-        strcpy(wordin[i], tempWordin[i]);
-        strcpy(wordout[i], tempWordout[i]);
-    }
-    
-    /* returns nextLocationInTemp, which is eqaul to the length of the temporary arrays and therefore
+    /* returns nextLocationInTemp, which is equal to the length of the temporary arrays and therefore
      the number of word rules in clean form
      */
-    return nextLocationInTemp;
+    return nextLocationToStore;
 }
 
 int determineScore(const char document[], const char wordin[][MAX_WORD_LENGTH + 1], const char wordout[][MAX_WORD_LENGTH + 1], int nRules)
@@ -240,38 +276,50 @@ int determineScore(const char document[], const char wordin[][MAX_WORD_LENGTH + 
 
 int main()
 {
-    int n = 3;
-    char pee[] = "Happy families are all alike; every unhappy family is unhappy in its own way.";
-    char win[][MAX_WORD_LENGTH + 1] = {"family", "unhappy", "horse"};
-    char wout[][MAX_WORD_LENGTH + 1] = {"", "horse", ""};
-    int a = cleanupRules(win, wout, n);
+    char win1[][MAX_WORD_LENGTH + 1] = {"", "cat", "horse", "big", "Horse", "hoRse", "horse!", "tiger", "cat", "small", "rat", "aaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbb"};
+    char wout1[][MAX_WORD_LENGTH + 1] = {"pig", "", "big", "horse", "TRUck", "", "", "li0n", "", "horse", "rat", "bbbbbbbbbbbbbbbbbbbb", ""};
     
-    cerr << a << endl;
+    //assert(cleanupRules(win1, wout1, -1) == 0);
+    //assert(cleanupRules(win1, wout1, 0) == 0);
+    //assert(cleanupRules(win1, wout1, 1) == 0);
+    //assert(cleanupRules(win1, wout1, 2) == 1);
+    //assert(cleanupRules(win1, wout1, 3) == 2);
+    //assert(cleanupRules(win1, wout1, 4) == 3);
+    //assert(cleanupRules(win1, wout1, 5) == 4);
+    //assert(cleanupRules(win1, wout1, 6) == 3);
+    //assert(cleanupRules(win1, wout1, 7) == 3);
+    //assert(cleanupRules(win1, wout1, 8) == 3);
+    //assert(cleanupRules(win1, wout1, 9) == 3);
+    //assert(cleanupRules(win1, wout1, 10) == 4);
+    //assert(cleanupRules(win1, wout1, 11) == 4);
     
-    int b = determineScore(pee, win, wout, n);
+    char win2[][MAX_WORD_LENGTH + 1] = {"confusion", "FAMILY", "charm", "hearty", "house", "worn-out", "family", "charm", "ties", "", "charm", "FaMiLy"};
+    char wout2[][MAX_WORD_LENGTH + 1] = {"", "TIES", "confusion", "hearty", "intrigue", "younger", "first", "", "family", "frightened", "", "tIeS"};
     
-    cerr << b << endl;
+    //assert(cleanupRules(win2, wout2, 11) == 6);
     
-    const int TEST1_NRULES = 3;
-    char test1win[TEST1_NRULES][MAX_WORD_LENGTH+1] = {
-        "family", "unhappy", "horse",
-    };
-    char test1wout[TEST1_NRULES][MAX_WORD_LENGTH+1] = {
-        "",       "horse",   "",
-    };
-    assert(determineScore("Happy families are all alike; every unhappy family is unhappy in its own way.",
-                          test1win, test1wout, TEST1_NRULES) == 2);
-    assert(determineScore("Happy horses are all alike; every unhappy horse is unhappy in its own way.",
-                          test1win, test1wout, TEST1_NRULES-1) == 0);
-    assert(determineScore("Happy horses are all alike; every unhappy horse is unhappy in its own way.",
-                          test1win, test1wout, TEST1_NRULES) == 1);
-    assert(determineScore("A horse!  A horse!  My kingdom for a horse!",
-                          test1win, test1wout, TEST1_NRULES) == 1);
-    assert(determineScore("horse:stable ratio is 10:1",
-                          test1win, test1wout, TEST1_NRULES) == 0);
-    assert(determineScore("**** 2020 ****",
-                          test1win, test1wout, TEST1_NRULES) == 0);
-    cout << "All tests succeeded" << endl;
+    char win3[][MAX_WORD_LENGTH + 1] = {"big", "dog", "big"};
+    char wout3[][MAX_WORD_LENGTH + 1] = {"horse", "", "house"};
+    cleanupRules(win3, wout3, 3);
+    
+    assert(determineScore("I like dog", win3, wout3, -1) == 0);
+    assert(determineScore("I like dog", win3, wout3, 0) == 0);
+    assert(determineScore("", win3, wout3, 2) == 0);
+    assert(determineScore(" !@#$%^&*() ", win3, wout3, 2) == 0);
+    assert(determineScore("I like dog", win3, wout3, 2) == 1);
+    assert(determineScore("I like big dog", win3, wout3, 2) == 2);
+    assert(determineScore("I like BIG dog", win3, wout3, 2) == 2);
+    assert(determineScore("I like B-I-G dog", win3, wout3, 2) == 2);
+    assert(determineScore(" !@#$%^&*() I like big dog !@#$%^&*() ", win3, wout3, 2) == 2);
+    assert(determineScore("I ^&*(&*() like     big    dog", win3, wout3, 2) == 2);
+    assert(determineScore("Ilikebigdog", win3, wout3, 2) == 0);
+    assert(determineScore("I like big, big dog", win3, wout3, 2) == 2);
+    assert(determineScore("I like big horse", win3, wout3, 2) == 0);
+    assert(determineScore("I like bigger", win3, wout3, 2) == 0);
+    assert(determineScore("I like big horse", win3, wout3, 3) == 1);
+    assert(determineScore("I like big", win3, wout3, 3) == 2);
+    assert(determineScore("I like big ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg", win3, wout3, 3) == 2);
+
 }
 
 
