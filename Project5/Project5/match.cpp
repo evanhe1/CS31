@@ -68,8 +68,8 @@ int cleanupRules(char wordin[][MAX_WORD_LENGTH + 1], char wordout[][MAX_WORD_LEN
                 if (strlen(wordout[i]) == 0)
                 {
                     /* check if element at wordin[i] has already been processed as part of a one-word rule (moved
-                     to the front of wordin), every element coming before wordin[nextLocationToStore] is al element in
-                     clean form, so a match would indicate that the element at wordin[i] is a duplicate
+                     to the front of wordin), every element coming before wordin[nextLocationToStore] is an element
+                     in clean form, so a match would indicate that the element at wordin[i] is a duplicate
                      */
                     int j;
                     for (j = 0; j < nextLocationToStore; j++)
@@ -86,9 +86,9 @@ int cleanupRules(char wordin[][MAX_WORD_LENGTH + 1], char wordout[][MAX_WORD_LEN
                      */
                     if (j == nextLocationToStore)
                     {
-                        /* nextWordinElementToMove and nextWordoutElementToMove are char arrays that will serve as a temporary arrays
-                         to store a newly found clean form word rule while other elements are shifted so the word rule can be stored in
-                         front of all unprocessed elements
+                        /* nextWordinElementToMove and nextWordoutElementToMove are char arrays that will serve as
+                         temporary arrays to store a newly found clean form word rule while other elements are
+                         shifted so the word rule can be stored in front of all unprocessed elements
                          */
                         char nextWordinElementToMove[MAX_WORD_LENGTH + 1];
                         char nextWordoutElementToMove[MAX_WORD_LENGTH + 1];
@@ -120,8 +120,8 @@ int cleanupRules(char wordin[][MAX_WORD_LENGTH + 1], char wordout[][MAX_WORD_LEN
         if (strlen(wordin[i]) > 0 && strlen(wordout[i]) > 0)
         {
             /* check if all characters in wordin[i] and wordout[i] are lowercase letters (this check is necessary
-             because although all letters in wordin[i] are now lowercase, there could still be be
-             nonletter characters in the string)
+             because although all letters in wordin[i] are now lowercase, there could still be be nonletter
+             characters in the string)
              */
             if (isOnlyLowerCase(wordin[i]) && isOnlyLowerCase(wordout[i]))
             {
@@ -145,7 +145,7 @@ int cleanupRules(char wordin[][MAX_WORD_LENGTH + 1], char wordout[][MAX_WORD_LEN
                             break;
                     }
                     
-                    /* at this point all criteria are satisfied for a valid, non-duplicate one-word rule
+                    /* at this point all criteria are satisfied for a valid, non-duplicate two-word rule
                      that does not also overlap with a pre-existing one-word rule, so all elements between
                      indices nextLocationToStore and i (the index of the newly found word rule in clean form)
                      in wordin and wordout are shifted over one to the right before wordin[i] and wordout[i]
@@ -156,9 +156,9 @@ int cleanupRules(char wordin[][MAX_WORD_LENGTH + 1], char wordout[][MAX_WORD_LEN
                      */
                     if (k == nextLocationToStore)
                     {
-                        /* nextWordinElementToMove and nextWordoutElementToMove are char arrays that will serve as a temporary arrays
-                         to store a newly found clean form word rule while other elements are shifted so the word rule can be stored in
-                         front of all unprocessed elements
+                        /* nextWordinElementToMove and nextWordoutElementToMove are char arrays that will serve as
+                         temporary arrays to store a newly found clean form word rule while other elements are
+                         shifted so the word rule can be stored in front of all unprocessed elements
                          */
                         char nextWordinElementToMove[MAX_WORD_LENGTH + 1];
                         char nextWordoutElementToMove[MAX_WORD_LENGTH + 1];
@@ -181,7 +181,7 @@ int cleanupRules(char wordin[][MAX_WORD_LENGTH + 1], char wordout[][MAX_WORD_LEN
         }
     }
     
-    /* returns nextLocationInTemp, which is equal to the length of the temporary arrays and therefore
+    /* returns nextLocationToStore, which is equal to the length of the temporary arrays and therefore
      the number of word rules in clean form
      */
     return nextLocationToStore;
@@ -193,13 +193,13 @@ int determineScore(const char document[], const char wordin[][MAX_WORD_LENGTH + 
     int score = 0;
     
     /* matchesWordin is an array of bool that tracks which elements of wordin that document matches, by default
-     all valuesin the array are set to false, array will not be modified until near the end of the program,
+     all values in the array are set to false, array will not be modified until near the end of the program,
      initialized here to draw attention
      */
     bool matchesWordin[MAX_DOCUMENT_LENGTH + 1] = {false};
     
-    /* matchesWordout is an array of bool that tracks which elements of wordout that document matches,
-     by default all valuesin the array are set to false, array will not be modified until near the end of the program,
+    /* matchesWordout is an array of bool that tracks which elements of wordout that document matches, by default
+     all values in the array are set to false, array will not be modified until near the end of the program,
      initialized here to draw attention
      */
     bool matchesWordout[MAX_DOCUMENT_LENGTH + 1] = {false};
@@ -213,25 +213,23 @@ int determineScore(const char document[], const char wordin[][MAX_WORD_LENGTH + 
     while (i < strlen(document))
     {
         /* iterate through all non-alphabetic characters between words to arrive
-         at beginning of next word or the null byte, in case of document with only
+         at the beginning of next word or the null byte, in case of document with only
          non-alphabetic characters, iterate straight through the end of the document
          */
         while (!isalpha(document[i]))
         {
             i++;
-            /* this if condition makes sure that the program terminates properly at the zero byte if reading a
-             string with only non-letter characters in it
-             */
-            if (document[i + 1] == '\0')
-            {
+            // if condition ensures that execution exists loop condition at correct time
+            if (i == strlen(document))
                 break;
-            }
         }
         
         int j = 0; // j tracks next position of interest in currentWord
         
-        // while the next character of interest is not a space or newline
-        while (!isspace(document[i]) && document[i] != '\0')
+        /* while the next character of interest is not a space and the next element is in bounds
+         (i would currently be in an out of bounds position if document had only contained nonletter characters)
+         */
+        while (!isspace(document[i]) && i < strlen(document))
         {
             // if the character at index i in document is a letter, store that character at index j, and increment j
             if (isalpha(document[i]))
@@ -241,9 +239,9 @@ int determineScore(const char document[], const char wordin[][MAX_WORD_LENGTH + 
             }
             i++;
             
-            /* at this point in execution, i and j will both be 1 greater than at the beginning of this loop iteration,
-             if the character at position i in document is a space or the zero byte, set the character at position k in
-             currentWord to the zero byte, marking the end of the string
+            /* at this point in execution, i and j will both be 1 greater than at the beginning of this loop
+             iteration, if the character at position i in document is a space or the zero byte, set the character
+             at position k in currentWord to the zero byte, marking the end of the string
              */
             if (isspace(document[i]) || document[i] == '\0')
             {
@@ -266,7 +264,7 @@ int determineScore(const char document[], const char wordin[][MAX_WORD_LENGTH + 
     
     /* iterate through the matchesWordin and matchesWordout arrays, if the element at index p in matchesWordin
      is true and the element at index p in matchesWordout is false, increment score (these conditions apply for both
-     one-word and two-word rules since the veracity of a one-word rule only depends on finding a match in the
+     one-word and two-word rules since a one-word rule match only depends on finding a match in the
      wordin array; the wordout array does not matter)
      */
     for (int p = 0; p < nRules; p++)
@@ -281,10 +279,10 @@ int determineScore(const char document[], const char wordin[][MAX_WORD_LENGTH + 
 int main()
 {
     
-    char win1[][MAX_WORD_LENGTH + 1] = {"", "cat", "horse", "big", "Horse", "hoRse", "horse!", "tiger", "cat", "small", "rat", "aaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbb"};
-    char wout1[][MAX_WORD_LENGTH + 1] = {"pig", "", "big", "horse", "TRUck", "", "", "li0n", "", "horse", "rat", "bbbbbbbbbbbbbbbbbbbb", ""};
+    char win1[][MAX_WORD_LENGTH + 1] = {"", "cat", "horse", "big", "Horse", "hoRse", "bear!", "tiger", "cat", "small", "rat", "aaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbb", "cat", "horse"};
+    char wout1[][MAX_WORD_LENGTH + 1] = {"pig", "", "big", "horse", "TRUck", "", "", "li0n", "", "horse", "rat", "bbbbbbbbbbbbbbbbbbbb", "", "", "big"};
     
-    assert(cleanupRules(win1, wout1, -1) == 0);
+    //assert(cleanupRules(win1, wout1, -1) == 0);
     //assert(cleanupRules(win1, wout1, 0) == 0);
     //assert(cleanupRules(win1, wout1, 1) == 0);
     //assert(cleanupRules(win1, wout1, 2) == 1);
@@ -297,7 +295,10 @@ int main()
     //assert(cleanupRules(win1, wout1, 9) == 3);
     //assert(cleanupRules(win1, wout1, 10) == 4);
     //assert(cleanupRules(win1, wout1, 11) == 4);
-    
+    //assert(cleanupRules(win1, wout1, 12) == 5);
+    //assert(cleanupRules(win1, wout1, 13) == 6);
+    //assert(cleanupRules(win1, wout1, 14) == 6);
+    assert(cleanupRules(win1, wout1, 15) == 6);
     
     char win2[][MAX_WORD_LENGTH + 1] = {"confusion", "FAMILY", "charm", "hearty", "house", "worn-out", "family", "charm", "ties", "", "charm", "FaMiLy"};
     char wout2[][MAX_WORD_LENGTH + 1] = {"", "TIES", "confusion", "hearty", "intrigue", "younger", "first", "", "family", "frightened", "", "tIeS"};
@@ -314,6 +315,7 @@ int main()
     assert(determineScore("", win3, wout3, 2) == 0);
     assert(determineScore(" !@#$%^&*() ", win3, wout3, 2) == 0);
     assert(determineScore("I like dog", win3, wout3, 2) == 1);
+    assert(determineScore("I like big", win3, wout3, 2) == 1);
     assert(determineScore("I like big dog", win3, wout3, 2) == 2);
     assert(determineScore("I like BIG dog", win3, wout3, 2) == 2);
     assert(determineScore("I like B-I-G dog", win3, wout3, 2) == 2);
@@ -321,14 +323,32 @@ int main()
     assert(determineScore("I ^&*(&*() like     big    dog", win3, wout3, 2) == 2);
     assert(determineScore("Ilikebigdog", win3, wout3, 2) == 0);
     assert(determineScore("I like big, big dog", win3, wout3, 2) == 2);
+    assert(determineScore("I like big dog dog", win3, wout3, 2) == 2);
     assert(determineScore("I like big horse", win3, wout3, 2) == 0);
-    assert(determineScore("I like bigger", win3, wout3, 2) == 0);
     assert(determineScore("I like big horse", win3, wout3, 3) == 1);
-    assert(determineScore("I like big", win3, wout3, 3) == 2);
-    assert(determineScore("I like big ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg", win3, wout3, 3) == 2);
+    assert(determineScore("I like big dog", win3, wout3, 3) == 3);
+    assert(determineScore("I like big ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg      ", win3, wout3, 3) == 2);
     
-    cerr << "All tests succeeded" << endl;
-
+    const int TEST1_NRULES = 3;
+    char test1win[TEST1_NRULES][MAX_WORD_LENGTH+1] = {
+        "family", "unhappy", "horse",
+    };
+    char test1wout[TEST1_NRULES][MAX_WORD_LENGTH+1] = {
+        "",       "horse",   "",
+    };
+    assert(determineScore("Happy families are all alike; every unhappy family is unhappy in its own way.",
+                          test1win, test1wout, TEST1_NRULES) == 2);
+    assert(determineScore("Happy horses are all alike; every unhappy horse is unhappy in its own way.",
+                          test1win, test1wout, TEST1_NRULES-1) == 0);
+    assert(determineScore("Happy horses are all alike; every unhappy horse is unhappy in its own way.",
+                          test1win, test1wout, TEST1_NRULES) == 1);
+    assert(determineScore("A horse!  A horse!  My kingdom for a horse!",
+                          test1win, test1wout, TEST1_NRULES) == 1);
+    assert(determineScore("horse:stable ratio is 10:1",
+                          test1win, test1wout, TEST1_NRULES) == 0);
+    assert(determineScore("**** 2020 ****",
+                          test1win, test1wout, TEST1_NRULES) == 0);
+    cout << "All tests succeeded" << endl;
 }
 
 
