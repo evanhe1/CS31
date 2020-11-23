@@ -15,13 +15,16 @@ const int MAX_DOCUMENT_LENGTH = 250;
 
 bool isOnlyLowerCase(char s[])
 {
+    // return false if length of input string is 0 or negative
     if (strlen(s) <= 0)
         return false;
     
+    // return false if any character within the input string is not a lowercase letter
     for (int i = 0; i < strlen(s); i++)
         if (!islower(s[i]))
             return false;
     
+    // at this point in execution, it is guarenteed that the input string only contains lowercase letters
     return true;
 }
 
