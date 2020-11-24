@@ -352,6 +352,18 @@ int main()
     assert(determineScore("**** 2020 ****",
                           test1win, test1wout, TEST1_NRULES) == 0);
     cout << "All tests succeeded" << endl;
+    const int TEST2_NRULES = 12;
+    char test2win[TEST2_NRULES][MAX_WORD_LENGTH+1] = {
+        "confusion", "FAMILY", "charm", "hearty", "house", "worn-out", "family", "charm", "ties", "", "charm", "FaMiLy",
+    };
+    char test2wout[TEST2_NRULES][MAX_WORD_LENGTH+1] = {
+        "", "TIES", "confusion", "hearty", "intrigue", "younger", "first", "", "family", "frightened", "", "tIeS",
+    };
+    int n = cleanupRules(test2win, test2wout, TEST2_NRULES);
+    for (int k = 0; k < n; k++)
+        cout << "|" << test2win[k] << "|   |" << test2wout[k] << "|" << endl;
+    assert(n == 6);
+    cout << "All tests succeeded" << endl;
 }
 
 
