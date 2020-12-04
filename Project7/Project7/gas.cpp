@@ -183,24 +183,28 @@ void Flatulan::move()
                 m_city->determineNewPosition(m_row, m_col, UP);
                 break;
             }
+            else break;
         case DOWN:
             if ((m_row + 1) <= m_city->cols() && !(m_city->isPlayerAt(m_row + 1, m_col)))
             {
                 m_city->determineNewPosition(m_row, m_col, DOWN);
                 break;
             }
+            else break;
         case LEFT:
             if ((m_col - 1) >= 1 && !(m_city->isPlayerAt(m_row, m_col - 1)))
             {
                 m_city->determineNewPosition(m_row, m_col, LEFT);
                 break;
             }
+            else break;
         case RIGHT:
             if ((m_col + 1) <= m_city->rows() && !(m_city->isPlayerAt(m_row, m_col + 1)))
             {
                 m_city->determineNewPosition(m_row, m_col, RIGHT);
                 break;
             }
+            else break;
     }
     // fixed implementation
 }
