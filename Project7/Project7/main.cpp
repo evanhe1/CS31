@@ -564,7 +564,7 @@ void City::moveFlatulans()
         // If that move results in that Flatulan being orthogonally
         // adjacent to the player, the player suffers a gas blast.
         m_flatulans[k]->move();
-        if (abs(m_flatulans[k]->row() - m_player->row()) <= 1 && abs(m_flatulans[k]->col() - m_player-> col()) <= 1)
+        if (((abs(m_flatulans[k]->row() - m_player->row()) <= 1) && (m_flatulans[k]->col() == m_player->col())) || ((abs(m_flatulans[k]->col() - m_player-> col()) <= 1) && (m_flatulans[k]->row() == m_player->row())))
             m_player->getGassed();
     }
 }
@@ -698,7 +698,7 @@ int main()
 {
     // Create a game
     // Use this instead to create a mini-game:   Game g(3, 4, 2);
-    Game g(1, 2, 100);
+    Game g(3, 4, 2);
     
     // Play the game
     g.play();
