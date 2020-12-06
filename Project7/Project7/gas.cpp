@@ -177,6 +177,10 @@ void Flatulan::move()
     int dir = randInt(0, NUMDIRS-1);  // dir is now UP, DOWN, LEFT, or RIGHT
     switch (dir)
     {
+        // for each case, check if the player is not at the destination of the propposed move
+        // then utilize m_city->determineNewPosition() to determine if destination is in-bounds
+        // since position variables for m_city->determineNewPosition() are pass by reference,
+        // determineNewPosition will actually modify the flatulan's position
         case UP:
             if ((m_row - 1) >= 1 && !(m_city->isPlayerAt(m_row - 1, m_col)))
             {
@@ -185,7 +189,7 @@ void Flatulan::move()
             }
             else break;
         case DOWN:
-            if ((m_row + 1) <= m_city->cols() && !(m_city->isPlayerAt(m_row + 1, m_col)))
+            if ((m_row + 1) <= m_city->rows() && !(m_city->isPlayerAt(m_row + 1, m_col)))
             {
                 m_city->determineNewPosition(m_row, m_col, DOWN);
                 break;
@@ -199,7 +203,7 @@ void Flatulan::move()
             }
             else break;
         case RIGHT:
-            if ((m_col + 1) <= m_city->rows() && !(m_city->isPlayerAt(m_row, m_col + 1)))
+            if ((m_col + 1) <= m_city->cols() && !(m_city->isPlayerAt(m_row, m_col + 1)))
             {
                 m_city->determineNewPosition(m_row, m_col, RIGHT);
                 break;
@@ -211,6 +215,7 @@ void Flatulan::move()
 
 bool Flatulan::possiblyGetConverted()  // return true if converted
 {
+    // Be converted with 2/3 probability
     // generate pseudo-random number between 1 and 3, return true if value is 1 or 2
     // the value will be 1 or 2 2/3 of the time
     return (randInt(1, 3) != 3);  // fixed implementation
@@ -276,6 +281,10 @@ void Player::move(int dir)
     m_age++;
     switch (dir)
     {
+        // for each case, check if there are no flatulans at the destination of the propposed move
+        // then utilize m_city->determineNewPosition() to determine if destination is in-bounds
+        // since position variables for m_city->determineNewPosition() are pass by reference,
+        // determineNewPosition will actually modify the player's position
         case UP:
             if (m_city->nFlatulansAt(m_row - 1, m_col) == 0)
             {
@@ -335,7 +344,10 @@ City::City(int nRows, int nCols)
 
 City::~City()
 {
+    // delete player
     delete m_player;
+    // delete any flatulans that had not been deleted through player's preaching
+    // (if player loses the game or quits early)
     for (int i = 0; i < m_nFlatulans; i++)
     {
         delete m_flatulans[i];
@@ -390,6 +402,8 @@ bool City::determineNewPosition(int& r, int& c, int dir) const
     // return true.
     switch (dir)
     {
+        // for each case, check if prospective move in specified direction still results
+        // in an in-bounds position, only modify r or c if true
         case UP:
             if (isInBounds(r - 1, c))
             {
@@ -421,6 +435,7 @@ bool City::determineNewPosition(int& r, int& c, int dir) const
             }
             else break;
     }
+    // return false if move results in an out-of-bounds position, or if any other error occurs
     return false; // fixed implementation
 }
 
@@ -443,6 +458,8 @@ void City::display() const
     for (r = 0; r < rows(); r++)
         for (c = 0; c < cols(); c++)
         {
+            // need to add 1 to r and c since top left element in grid is at position (0, 0)
+            // in the game itself this position is (1, 1)
             if (nFlatulansAt(r + 1, c + 1) == 1)
                 grid[r][c] = 'F';
             else if (nFlatulansAt(r + 1, c + 1) >= 2 && nFlatulansAt(r + 1, c + 1) <= 8)
@@ -506,11 +523,13 @@ bool City::addFlatulan(int r, int c)
     // in this scenario (which won't occur in this game):  MAXFLATULANS
     // Flatulans are added, then some are converted, then more are added.
     
+    // return false if no more flatulans can be added
     if (flatulanCount() == MAXFLATULANS)
         return false;
     
+    // adds a new flatulan at the next available index of n_flatulans through dynamic memory allocation
     m_flatulans[m_nFlatulans] = new Flatulan(this, r, c);
-    m_nFlatulans++;
+    m_nFlatulans++; // m_nFlatulans also increases by 1 to reflect this change
     return true; // fixed implementation
 }
 
@@ -540,20 +559,30 @@ void City::preachToFlatulansAroundPlayer()
     // the player.
     
     int i = 0;
+    // while loop for iterating through every non-converted flatulan
     while (i < m_nFlatulans)
     {
+        // check flatulan's proxiomity to player
         if (abs(m_flatulans[i]->row() - m_player->row()) <= 1 && abs(m_flatulans[i]->col() - m_player->col()) <= 1)
         {
+            // execute statements below if flatulan is converted
             if (m_flatulans[i]->possiblyGetConverted())
             {
+                // delete object that m_flatulans pointer points to
                 delete m_flatulans[i];
                 for (int j = i; j < m_nFlatulans - 1; j++)
+                {
+                    // move m_flatulans so that it is not a dangling pointer, avoid undefined behavior
                     m_flatulans[j] = m_flatulans[j + 1];
+                }
+                // subtract 1 from numFlatulans to reflect fact that a flatulan has been deleted
                 m_nFlatulans--;
             }
+            // move pointer to next flatulan if current flatulan is not converted
             else
                 i++;
         }
+        // move pointer to next flatulan if current flatulan is not directly orthogonal or diagonal to player
         else
             i++;
     }
@@ -567,8 +596,13 @@ void City::moveFlatulans()
         // Have the k-th Flatulan in the city make one move.
         // If that move results in that Flatulan being orthogonally
         // adjacent to the player, the player suffers a gas blast.
+        
+        // move kth flatulan
         m_flatulans[k]->move();
-        if (((abs(m_flatulans[k]->row() - m_player->row()) <= 1) && (m_flatulans[k]->col() == m_player->col())) || ((abs(m_flatulans[k]->col() - m_player-> col()) <= 1) && (m_flatulans[k]->row() == m_player->row())))
+        
+        // check flatulan's proximity to player, statement is true only when flatulan is orthogonal to player
+        if (((abs(m_flatulans[k]->row() - m_player->row()) == 1) && (m_flatulans[k]->col() == m_player->col())) || ((abs(m_flatulans[k]->col() - m_player-> col()) == 1) && (m_flatulans[k]->row() == m_player->row())))
+            // pass gas if flatulan is within proximity
             m_player->getGassed();
     }
 }
@@ -702,7 +736,7 @@ int main()
 {
     // Create a game
     // Use this instead to create a mini-game:   Game g(3, 4, 2);
-    Game g(3, 4, 2);
+    Game g(1, 20, 10);
     
     // Play the game
     g.play();
